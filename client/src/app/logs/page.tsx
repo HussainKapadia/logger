@@ -8,15 +8,43 @@ import {
 } from "@/components/logs/UIComponents";
 import LogsTable from "@/components/logs/LogsTable";
 import Pagination from "@/components/logs/Pagination";
+import LogsFilterPanel from "@/components/logs/LogsFilterPanel";
+import { useEffect, useState } from "react";
+import type { LogsFilterState } from "@/hooks/useLogs";
 import { useUrlParams, useLogs } from "@/hooks/useLogs";
 import { Log } from "@/types/logs";
 
 export default function LogsPage() {
-  const { currentPage, limit, updateUrl } = useUrlParams();
+  const { currentPage, limit, updateUrl, filterState } = useUrlParams();
   const { logs, pagination, loading, error, refetch } = useLogs(
     currentPage,
-    limit
+    limit,
+    filterState
   );
+
+  const [appNames, setAppNames] = useState<string[]>([]);
+  const [levels, setLevels] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/logs/app-names")
+      .then((res) => res.json())
+      .then((data) => setAppNames(data.appNames || []));
+    fetch("/api/logs/levels")
+      .then((res) => res.json())
+      .then((data) => setLevels(data.levels || []));
+  }, []);
+
+  const handleFilterChange = (filters: LogsFilterState) => {
+    updateUrl({
+      apps: filters.apps,
+      levels: filters.levels,
+      sort: filters.sort,
+      page: 1,
+    });
+  };
+  const handleClearFilters = () => {
+    updateUrl({ clearFilters: true, page: 1 });
+  };
 
   const handlePageChange = (newPage: number) => {
     updateUrl({ page: newPage });
@@ -36,8 +64,11 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen h-screen bg-gray-50">
+      <div
+        className="max-w-full h-full mx-auto px-6 sm:px-8 lg:px-12 py-0 flex flex-col"
+        style={{ height: "100vh" }}
+      >
         <PageHeader
           actions={
             <button
@@ -61,29 +92,44 @@ export default function LogsPage() {
             </button>
           }
         />
-
-        {error ? (
-          <ErrorMessage message={error} onRetry={handleRetry} />
-        ) : loading ? (
-          <LoadingSpinner />
-        ) : logs.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-4">
-            <LogsTable
-              logs={logs}
-              limit={limit}
-              onLimitChange={handleLimitChange}
-              onRowClick={handleLogRowClick}
+        <div className="flex flex-1 gap-6 mt-4 h-0 min-h-0">
+          {/* Filter Sidebar */}
+          <div className="h-full flex-shrink-0">
+            <LogsFilterPanel
+              appNames={appNames}
+              levels={levels}
+              selectedApps={filterState.apps}
+              selectedLevels={filterState.levels}
+              sort={filterState.sort}
+              onChange={handleFilterChange}
+              onClear={handleClearFilters}
             />
-            {pagination && (
-              <Pagination
-                pagination={pagination}
-                onPageChange={handlePageChange}
-              />
+          </div>
+          <div className="flex-1 min-w-0 h-full overflow-y-auto bg-white rounded-lg shadow p-4">
+            {error ? (
+              <ErrorMessage message={error} onRetry={handleRetry} />
+            ) : loading ? (
+              <LoadingSpinner />
+            ) : logs.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <div className="space-y-4">
+                <LogsTable
+                  logs={logs}
+                  limit={limit}
+                  onLimitChange={handleLimitChange}
+                  onRowClick={handleLogRowClick}
+                />
+                {pagination && (
+                  <Pagination
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
