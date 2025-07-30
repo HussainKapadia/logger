@@ -39,6 +39,9 @@ export default function LogsPage() {
       apps: filters.apps,
       levels: filters.levels,
       sort: filters.sort,
+      from: filters.from,
+      to: filters.to,
+      userId: filters.userId,
       page: 1,
     });
   };
@@ -101,6 +104,9 @@ export default function LogsPage() {
               selectedApps={filterState.apps}
               selectedLevels={filterState.levels}
               sort={filterState.sort}
+              from={filterState.from}
+              to={filterState.to}
+              userId={filterState.userId}
               onChange={handleFilterChange}
               onClear={handleClearFilters}
             />

@@ -25,10 +25,51 @@ router.get("/", async (req: Request, res: Response) => {
       filter["Log.Level"] = { $in: levels };
     }
 
+    // User ID filter
+    const userId = req.query.userId as string | undefined;
+    if (userId) {
+      const userIdNum = parseInt(userId);
+      if (isNaN(userIdNum)) {
+        return res.status(400).json({ error: "Invalid User ID" });
+      }
+      filter.UserId = userIdNum;
+    }
+
     let sort: any = {};
     if (req.query.sort === "asc") sort["Log.TimeStamp"] = 1;
     else if (req.query.sort === "desc") sort["Log.TimeStamp"] = -1;
     else sort["Log.TimeStamp"] = -1;
+
+    // Date range filter
+    const from = req.query.from as string | undefined;
+    const to = req.query.to as string | undefined;
+    if (from || to) {
+      const dateFilter: any = {};
+      if (from) {
+        const fromDate = new Date(from);
+        if (isNaN(fromDate.getTime())) {
+          return res.status(400).json({ error: "Invalid 'from' date" });
+        }
+        dateFilter.$gte = fromDate;
+      }
+      if (to) {
+        const toDate = new Date(to);
+        if (isNaN(toDate.getTime())) {
+          return res.status(400).json({ error: "Invalid 'to' date" });
+        }
+        dateFilter.$lte = toDate;
+      }
+      if (
+        dateFilter.$gte &&
+        dateFilter.$lte &&
+        dateFilter.$gte > dateFilter.$lte
+      ) {
+        return res
+          .status(400)
+          .json({ error: "'from' date cannot be after 'to' date" });
+      }
+      filter["Log.TimeStamp"] = dateFilter;
+    }
 
     const [logs, total] = await Promise.all([
       LogModel.find(filter).sort(sort).skip(skip).limit(limit),

@@ -6,10 +6,16 @@ interface LogsFilterPanelProps {
   selectedApps: string[];
   selectedLevels: string[];
   sort: "asc" | "desc";
+  from?: string;
+  to?: string;
+  userId?: string;
   onChange: (filters: {
     apps: string[];
     levels: string[];
     sort: "asc" | "desc";
+    from?: string;
+    to?: string;
+    userId?: string;
   }) => void;
   onClear: () => void;
 }
@@ -20,6 +26,9 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
   selectedApps,
   selectedLevels,
   sort,
+  from,
+  to,
+  userId,
   onChange,
   onClear,
 }) => {
@@ -120,6 +129,25 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
             </div>
           </div>
           <div>
+            <h3 className="font-medium mb-2 text-black">User ID</h3>
+            <input
+              type="text"
+              placeholder="Enter User ID"
+              value={userId || ""}
+              onChange={(e) =>
+                onChange({
+                  apps: selectedApps,
+                  levels: selectedLevels,
+                  sort,
+                  from,
+                  to,
+                  userId: e.target.value,
+                })
+              }
+              className="w-full border border-gray-300 rounded px-2 py-1 text-black"
+            />
+          </div>
+          <div>
             <h3 className="font-medium mb-2 text-black">Timestamp</h3>
             <button
               className="w-full border border-gray-300 rounded px-2 py-1 flex items-center justify-between text-black"
@@ -128,6 +156,45 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
               <span>Sort: {sort === "asc" ? "Oldest" : "Newest"}</span>
               <span>{sort === "asc" ? "↑" : "↓"}</span>
             </button>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2 text-black">Date Range</h3>
+            <div className="flex flex-col gap-2">
+              <label className="flex flex-col text-black">
+                From:
+                <input
+                  type="date"
+                  value={from || ""}
+                  onChange={(e) =>
+                    onChange({
+                      apps: selectedApps,
+                      levels: selectedLevels,
+                      sort,
+                      from: e.target.value,
+                      to,
+                    })
+                  }
+                  className="form-input"
+                />
+              </label>
+              <label className="flex flex-col text-black">
+                To:
+                <input
+                  type="date"
+                  value={to || ""}
+                  onChange={(e) =>
+                    onChange({
+                      apps: selectedApps,
+                      levels: selectedLevels,
+                      sort,
+                      from,
+                      to: e.target.value,
+                    })
+                  }
+                  className="form-input"
+                />
+              </label>
+            </div>
           </div>
           <button
             className="w-full bg-gray-100 hover:bg-gray-200 text-black rounded px-2 py-1 mt-2"

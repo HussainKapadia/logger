@@ -13,6 +13,9 @@ export interface LogsFilterState {
   apps: string[];
   levels: string[];
   sort: "asc" | "desc";
+  from?: string;
+  to?: string;
+  userId?: string;
 }
 
 export function useUrlParams() {
@@ -28,13 +31,16 @@ export function useUrlParams() {
   const apps = useMemo(() => searchParams.getAll("apps"), [searchParams]);
   const levels = useMemo(() => searchParams.getAll("levels"), [searchParams]);
   const sort = (searchParams.get("sort") as "asc" | "desc") || "desc";
+  const from = searchParams.get("from") || undefined;
+  const to = searchParams.get("to") || undefined;
+  const userId = searchParams.get("userId") || undefined;
 
   // Memoize filterState to avoid re-renders
   const filterState = useMemo(() => {
-    const state = { apps, levels, sort };
+    const state = { apps, levels, sort, from, to, userId };
     console.log("[useUrlParams] filterState created:", state);
     return state;
-  }, [apps, levels, sort]);
+  }, [apps, levels, sort, from, to, userId]);
 
   const updateUrl = (newParams: {
     page?: number;
@@ -43,6 +49,8 @@ export function useUrlParams() {
     levels?: string[];
     userId?: string;
     sort?: "asc" | "desc";
+    from?: string;
+    to?: string;
     clearFilters?: boolean;
   }) => {
     const params = new URLSearchParams(searchParams);
@@ -60,6 +68,9 @@ export function useUrlParams() {
       params.delete("apps");
       params.delete("levels");
       params.delete("sort");
+      params.delete("from");
+      params.delete("to");
+      params.delete("userId");
     } else {
       if (newParams.apps !== undefined) {
         params.delete("apps");
@@ -71,6 +82,18 @@ export function useUrlParams() {
       }
       if (newParams.sort !== undefined) {
         params.set("sort", newParams.sort);
+      }
+      if (newParams.from !== undefined) {
+        if (newParams.from) params.set("from", newParams.from);
+        else params.delete("from");
+      }
+      if (newParams.to !== undefined) {
+        if (newParams.to) params.set("to", newParams.to);
+        else params.delete("to");
+      }
+      if (newParams.userId !== undefined) {
+        if (newParams.userId) params.set("userId", newParams.userId);
+        else params.delete("userId");
       }
     }
 
@@ -120,6 +143,9 @@ export function useLogs(
       filters.apps.forEach((a) => params.append("apps", a));
       filters.levels.forEach((l) => params.append("levels", l));
       if (filters.sort) params.set("sort", filters.sort);
+      if (filters.from) params.set("from", filters.from);
+      if (filters.to) params.set("to", filters.to);
+      if (filters.userId) params.set("userId", filters.userId);
 
       const response = await fetch(`/api/logs?${params.toString()}`);
 
@@ -145,7 +171,16 @@ export function useLogs(
   useEffect(() => {
     console.log("[useLogs] fetchLogs triggered", { page, limit, filters });
     fetchLogs(page, limit, filters);
-  }, [page, limit, filters.apps, filters.levels, filters.sort]);
+  }, [
+    page,
+    limit,
+    filters.apps,
+    filters.levels,
+    filters.sort,
+    filters.from,
+    filters.to,
+    filters.userId,
+  ]);
 
   const refetch = () => {
     fetchLogs(page, limit, filters);
