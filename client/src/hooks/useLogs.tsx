@@ -18,9 +18,30 @@ export interface LogsFilterState {
   userId?: string;
 }
 
+//calculate the new page
+function calculateNewPage(
+  currentPage: number,
+  currentLimit: number,
+  newLimit: number,
+  totalItems: number
+): number {
+  const startIndex = (currentPage - 1) * currentLimit;
+
+  const newPage = Math.floor(startIndex / newLimit) + 1;
+
+  if (newPage < 1) return 1;
+  const maxPages = Math.ceil(totalItems / newLimit);
+
+  if (maxPages < 1) return 1;
+  const finalPage = Math.min(newPage, maxPages);
+
+  return finalPage;
+}
+
 export function useUrlParams() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [totalItems, setTotalItems] = useState<number>(0);
 
   const currentPage = parseInt(
     searchParams.get("page") || DEFAULT_PAGE.toString()
@@ -52,16 +73,37 @@ export function useUrlParams() {
     from?: string;
     to?: string;
     clearFilters?: boolean;
+    totalItems?: number;
   }) => {
     const params = new URLSearchParams(searchParams);
+    let targetPage = newParams.page;
 
-    if (newParams.page !== undefined) {
-      params.set("page", newParams.page.toString());
+    if (newParams.limit !== undefined && newParams.limit !== limit) {
+      const newLimit = newParams.limit;
+      const currentTotalItems = newParams.totalItems || totalItems;
+
+      if (currentTotalItems > 0) {
+        targetPage = calculateNewPage(
+          currentPage,
+          limit,
+          newLimit,
+          currentTotalItems
+        );
+        console.log(
+          `[updateUrl] Limit changed from ${limit} to ${newLimit}. Page adjusted from ${currentPage} to ${targetPage} (total items: ${currentTotalItems})`
+        );
+      } else {
+        console.warn(
+          `[updateUrl] No total items available, resetting to first page. Current total items: ${currentTotalItems}`
+        );
+        targetPage = 1;
+      }
+
+      params.set("limit", newLimit.toString());
     }
 
-    if (newParams.limit !== undefined) {
-      params.set("limit", newParams.limit.toString());
-      params.set("page", "1");
+    if (targetPage !== undefined) {
+      params.set("page", targetPage.toString());
     }
 
     if (newParams.clearFilters) {
@@ -71,6 +113,7 @@ export function useUrlParams() {
       params.delete("from");
       params.delete("to");
       params.delete("userId");
+      params.set("page", "1");
     } else {
       if (newParams.apps !== undefined) {
         params.delete("apps");
@@ -106,7 +149,11 @@ export function useUrlParams() {
     router.push(`/logs?${params.toString()}`);
   };
 
-  return { currentPage, limit, updateUrl, filterState };
+  const updateTotalItems = (total: number) => {
+    setTotalItems(total);
+  };
+
+  return { currentPage, limit, updateUrl, filterState, updateTotalItems };
 }
 
 // Logs Data Hook

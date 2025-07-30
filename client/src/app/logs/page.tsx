@@ -15,7 +15,8 @@ import { useUrlParams, useLogs } from "@/hooks/useLogs";
 import { Log } from "@/types/logs";
 
 export default function LogsPage() {
-  const { currentPage, limit, updateUrl, filterState } = useUrlParams();
+  const { currentPage, limit, updateUrl, filterState, updateTotalItems } =
+    useUrlParams();
   const { logs, pagination, loading, error, refetch } = useLogs(
     currentPage,
     limit,
@@ -34,6 +35,12 @@ export default function LogsPage() {
       .then((data) => setLevels(data.levels || []));
   }, []);
 
+  useEffect(() => {
+    if (pagination?.total !== undefined) {
+      updateTotalItems(pagination.total);
+    }
+  }, [pagination?.total, updateTotalItems]);
+
   const handleFilterChange = (filters: LogsFilterState) => {
     updateUrl({
       apps: filters.apps,
@@ -45,6 +52,7 @@ export default function LogsPage() {
       page: 1,
     });
   };
+
   const handleClearFilters = () => {
     updateUrl({ clearFilters: true, page: 1 });
   };
@@ -54,7 +62,10 @@ export default function LogsPage() {
   };
 
   const handleLimitChange = (newLimit: number) => {
-    updateUrl({ limit: newLimit });
+    updateUrl({
+      limit: newLimit,
+      totalItems: pagination?.total || 0,
+    });
   };
 
   const handleLogRowClick = (log: Log) => {
