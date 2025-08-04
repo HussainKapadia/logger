@@ -12,10 +12,10 @@ import {
 export interface LogsFilterState {
   apps: string[];
   levels: string[];
+  userIds: string[];
   sort: "asc" | "desc";
   from?: string;
   to?: string;
-  userId?: string;
 }
 
 //calculate the new page
@@ -51,24 +51,24 @@ export function useUrlParams() {
   // Memoize arrays from URL params
   const apps = useMemo(() => searchParams.getAll("apps"), [searchParams]);
   const levels = useMemo(() => searchParams.getAll("levels"), [searchParams]);
+  const userIds = useMemo(() => searchParams.getAll("userIds"), [searchParams]);
   const sort = (searchParams.get("sort") as "asc" | "desc") || "desc";
   const from = searchParams.get("from") || undefined;
   const to = searchParams.get("to") || undefined;
-  const userId = searchParams.get("userId") || undefined;
 
   // Memoize filterState to avoid re-renders
   const filterState = useMemo(() => {
-    const state = { apps, levels, sort, from, to, userId };
+    const state = { apps, levels, userIds, sort, from, to };
     console.log("[useUrlParams] filterState created:", state);
     return state;
-  }, [apps, levels, sort, from, to, userId]);
+  }, [apps, levels, userIds, sort, from, to]);
 
   const updateUrl = (newParams: {
     page?: number;
     limit?: number;
     apps?: string[];
     levels?: string[];
-    userId?: string;
+    userIds?: string[];
     sort?: "asc" | "desc";
     from?: string;
     to?: string;
@@ -109,10 +109,10 @@ export function useUrlParams() {
     if (newParams.clearFilters) {
       params.delete("apps");
       params.delete("levels");
+      params.delete("userIds");
       params.delete("sort");
       params.delete("from");
       params.delete("to");
-      params.delete("userId");
       params.set("page", "1");
     } else {
       if (newParams.apps !== undefined) {
@@ -122,6 +122,10 @@ export function useUrlParams() {
       if (newParams.levels !== undefined) {
         params.delete("levels");
         newParams.levels.forEach((l) => params.append("levels", l));
+      }
+      if (newParams.userIds !== undefined) {
+        params.delete("userIds");
+        newParams.userIds.forEach((u) => params.append("userIds", u));
       }
       if (newParams.sort !== undefined) {
         params.set("sort", newParams.sort);
@@ -133,10 +137,6 @@ export function useUrlParams() {
       if (newParams.to !== undefined) {
         if (newParams.to) params.set("to", newParams.to);
         else params.delete("to");
-      }
-      if (newParams.userId !== undefined) {
-        if (newParams.userId) params.set("userId", newParams.userId);
-        else params.delete("userId");
       }
     }
 
@@ -189,10 +189,10 @@ export function useLogs(
       params.set("limit", limit.toString());
       filters.apps.forEach((a) => params.append("apps", a));
       filters.levels.forEach((l) => params.append("levels", l));
+      filters.userIds.forEach((u) => params.append("userIds", u));
       if (filters.sort) params.set("sort", filters.sort);
       if (filters.from) params.set("from", filters.from);
       if (filters.to) params.set("to", filters.to);
-      if (filters.userId) params.set("userId", filters.userId);
 
       const response = await fetch(`/api/logs?${params.toString()}`);
 
@@ -223,10 +223,10 @@ export function useLogs(
     limit,
     filters.apps,
     filters.levels,
+    filters.userIds,
     filters.sort,
     filters.from,
     filters.to,
-    filters.userId,
   ]);
 
   const refetch = () => {

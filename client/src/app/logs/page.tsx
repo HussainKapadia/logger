@@ -25,6 +25,7 @@ export default function LogsPage() {
 
   const [appNames, setAppNames] = useState<string[]>([]);
   const [levels, setLevels] = useState<string[]>([]);
+  const [userIds, setUserIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/logs/app-names")
@@ -33,6 +34,9 @@ export default function LogsPage() {
     fetch("/api/logs/levels")
       .then((res) => res.json())
       .then((data) => setLevels(data.levels || []));
+    fetch("/api/logs/user-ids")
+      .then((res) => res.json())
+      .then((data) => setUserIds(data.userIds || []));
   }, []);
 
   useEffect(() => {
@@ -45,10 +49,10 @@ export default function LogsPage() {
     updateUrl({
       apps: filters.apps,
       levels: filters.levels,
+      userIds: filters.userIds,
       sort: filters.sort,
       from: filters.from,
       to: filters.to,
-      userId: filters.userId,
       page: 1,
     });
   };
@@ -112,12 +116,13 @@ export default function LogsPage() {
             <LogsFilterPanel
               appNames={appNames}
               levels={levels}
+              userIds={userIds}
               selectedApps={filterState.apps}
               selectedLevels={filterState.levels}
+              selectedUserIds={filterState.userIds}
               sort={filterState.sort}
               from={filterState.from}
               to={filterState.to}
-              userId={filterState.userId}
               onChange={handleFilterChange}
               onClear={handleClearFilters}
             />

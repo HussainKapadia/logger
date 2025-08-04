@@ -34,9 +34,9 @@ const logSchema: Schema = new Schema(
       min: [1, "Log ID must be positive"],
     },
     UserId: {
-      type: Number,
+      type: String,
       required: [true, "User ID is required"],
-      min: [1, "User ID must be positive"],
+      minLength: [1, "User ID must be at least 1 character long"],
     },
     Log: {
       Level: {

@@ -25,14 +25,19 @@ router.get("/", async (req: Request, res: Response) => {
       filter["Log.Level"] = { $in: levels };
     }
 
-    // User ID filter
-    const userId = req.query.userId as string | undefined;
-    if (userId) {
-      const userIdNum = parseInt(userId);
-      if (isNaN(userIdNum)) {
-        return res.status(400).json({ error: "Invalid User ID" });
-      }
-      filter.UserId = userIdNum;
+    // Updated User ID filter to handle multiple selections
+    let userIds = req.query.userIds;
+    if (userIds) {
+      if (!Array.isArray(userIds)) userIds = [userIds];
+      const userIdNums = userIds.map((id) => {
+        const idString = typeof id === "string" ? id : String(id);
+        const userIdNum = parseInt(idString);
+        if (isNaN(userIdNum)) {
+          throw new Error("Invalid User ID");
+        }
+        return userIdNum;
+      });
+      filter.UserId = { $in: userIdNums };
     }
 
     let sort: any = {};
@@ -109,6 +114,30 @@ router.get("/levels", async (_req: Request, res: Response) => {
     res.json({ levels });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch log levels" });
+  }
+});
+
+// New endpoint to fetch all user IDs
+router.get("/user-ids", async (_req: Request, res: Response) => {
+  try {
+    const userIds = await LogModel.distinct("UserId");
+    // Convert to strings and sort numerically
+    const sortedUserIds = userIds
+      .map((id) => id.toString())
+      .sort((a, b) => parseInt(a) - parseInt(b));
+    res.json({ userIds: sortedUserIds });
+    console.log(sortedUserIds, "user IDs fetched successfully");
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch user IDs" });
+  }
+});
+
+router.get("/test", async (_req: Request, res: Response) => {
+  console.log("Checkin test endpoint");
+  try {
+    console.log("test data fetched successfully");
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch test data" });
   }
 });
 
