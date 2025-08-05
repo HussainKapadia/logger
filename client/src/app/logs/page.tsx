@@ -6,13 +6,14 @@ import {
   EmptyState,
   PageHeader,
 } from "@/components/logs/UIComponents";
-import LogsTable from "@/components/logs/LogsTable";
+import MuiLogsTable from "@/components/logs/MuiLogsTable";
 import Pagination from "@/components/logs/Pagination";
 import LogsFilterPanel from "@/components/logs/LogsFilterPanel";
 import { useEffect, useState } from "react";
 import type { LogsFilterState } from "@/hooks/useLogs";
 import { useUrlParams, useLogs } from "@/hooks/useLogs";
 import { Log } from "@/types/logs";
+import { Box, Container } from "@mui/material";
 
 export default function LogsPage() {
   const { currentPage, limit, updateUrl, filterState, updateTotalItems } =
@@ -82,10 +83,16 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="min-h-screen h-screen bg-gray-50">
-      <div
-        className="max-w-full h-full mx-auto px-6 sm:px-8 lg:px-12 py-0 flex flex-col"
-        style={{ height: "100vh" }}
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          px: { xs: 3, sm: 4, lg: 6 },
+          py: 0,
+        }}
       >
         <PageHeader
           actions={
@@ -110,9 +117,9 @@ export default function LogsPage() {
             </button>
           }
         />
-        <div className="flex flex-1 gap-6 mt-4 h-0 min-h-0">
+        <Box sx={{ display: "flex", flex: 1, gap: 3, mt: 2, minHeight: 0 }}>
           {/* Filter Sidebar */}
-          <div className="h-full flex-shrink-0">
+          <Box sx={{ flexShrink: 0, height: "fit-content" }}>
             <LogsFilterPanel
               appNames={appNames}
               levels={levels}
@@ -126,8 +133,22 @@ export default function LogsPage() {
               onChange={handleFilterChange}
               onClear={handleClearFilters}
             />
-          </div>
-          <div className="flex-1 min-w-0 h-full overflow-y-auto bg-white rounded-lg shadow p-4">
+          </Box>
+
+          {/* Main Content */}
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              height: "fit-content",
+              maxHeight: "calc(100vh - 200px)",
+              overflow: "auto",
+              bgcolor: "background.paper",
+              borderRadius: 2,
+              boxShadow: 1,
+              p: 2,
+            }}
+          >
             {error ? (
               <ErrorMessage message={error} onRetry={handleRetry} />
             ) : loading ? (
@@ -135,8 +156,8 @@ export default function LogsPage() {
             ) : logs.length === 0 ? (
               <EmptyState />
             ) : (
-              <div className="space-y-4">
-                <LogsTable
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <MuiLogsTable
                   logs={logs}
                   limit={limit}
                   onLimitChange={handleLimitChange}
@@ -148,11 +169,11 @@ export default function LogsPage() {
                     onPageChange={handlePageChange}
                   />
                 )}
-              </div>
+              </Box>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
