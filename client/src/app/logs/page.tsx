@@ -7,7 +7,7 @@ import {
   PageHeader,
 } from "@/components/logs/UIComponents";
 import MuiLogsTable from "@/components/logs/MuiLogsTable";
-import Pagination from "@/components/logs/Pagination";
+import MuiPaginationComponent from "@/components/logs/MuiPaginationComponent";
 import LogsFilterPanel from "@/components/logs/LogsFilterPanel";
 import { useEffect, useState } from "react";
 import type { LogsFilterState } from "@/hooks/useLogs";
@@ -140,36 +140,45 @@ export default function LogsPage() {
             sx={{
               flex: 1,
               minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
               height: "fit-content",
               maxHeight: "calc(100vh - 200px)",
-              overflow: "auto",
               bgcolor: "background.paper",
               borderRadius: 2,
               boxShadow: 1,
-              p: 2,
+              overflow: "hidden",
             }}
           >
             {error ? (
-              <ErrorMessage message={error} onRetry={handleRetry} />
+              <Box sx={{ p: 2 }}>
+                <ErrorMessage message={error} onRetry={handleRetry} />
+              </Box>
             ) : loading ? (
-              <LoadingSpinner />
+              <Box sx={{ p: 2 }}>
+                <LoadingSpinner />
+              </Box>
             ) : logs.length === 0 ? (
-              <EmptyState />
+              <Box sx={{ p: 2 }}>
+                <EmptyState />
+              </Box>
             ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <MuiLogsTable
-                  logs={logs}
-                  limit={limit}
-                  onLimitChange={handleLimitChange}
-                  onRowClick={handleLogRowClick}
-                />
+              <>
+                <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
+                  <MuiLogsTable
+                    logs={logs}
+                    limit={limit}
+                    onLimitChange={handleLimitChange}
+                    onRowClick={handleLogRowClick}
+                  />
+                </Box>
                 {pagination && (
-                  <Pagination
+                  <MuiPaginationComponent
                     pagination={pagination}
                     onPageChange={handlePageChange}
                   />
                 )}
-              </Box>
+              </>
             )}
           </Box>
         </Box>
