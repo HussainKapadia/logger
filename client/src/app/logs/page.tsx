@@ -87,11 +87,12 @@ export default function LogsPage() {
       <Container
         maxWidth={false}
         sx={{
-          height: "100vh",
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          px: { xs: 3, sm: 4, lg: 6 },
-          py: 0,
+          px: { xs: 2, sm: 3, lg: 4 },
+          py: 3,
+          gap: 2,
         }}
       >
         <PageHeader
@@ -117,9 +118,26 @@ export default function LogsPage() {
             </button>
           }
         />
-        <Box sx={{ display: "flex", flex: 1, gap: 3, mt: 2, minHeight: 0 }}>
+
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3,
+            flex: 1,
+            alignItems: "flex-start",
+            flexWrap: { xs: "wrap", lg: "nowrap" },
+          }}
+        >
           {/* Filter Sidebar */}
-          <Box sx={{ flexShrink: 0, height: "fit-content" }}>
+          <Box
+            sx={{
+              flexShrink: 0,
+              width: { xs: "100%", lg: "280px" },
+              maxHeight: { lg: "calc(100vh - 200px)" },
+              overflowY: { lg: "auto" },
+              order: { xs: 2, lg: 1 },
+            }}
+          >
             <LogsFilterPanel
               appNames={appNames}
               levels={levels}
@@ -142,24 +160,24 @@ export default function LogsPage() {
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
-              height: "fit-content",
-              maxHeight: "calc(100vh - 200px)",
               bgcolor: "background.paper",
               borderRadius: 2,
               boxShadow: 1,
               overflow: "hidden",
+              order: { xs: 1, lg: 2 },
+              minHeight: "400px",
             }}
           >
             {error ? (
-              <Box sx={{ p: 2 }}>
+              <Box sx={{ p: 3 }}>
                 <ErrorMessage message={error} onRetry={handleRetry} />
               </Box>
             ) : loading ? (
-              <Box sx={{ p: 2 }}>
+              <Box sx={{ p: 3 }}>
                 <LoadingSpinner />
               </Box>
             ) : logs.length === 0 ? (
-              <Box sx={{ p: 2 }}>
+              <Box sx={{ p: 3 }}>
                 <EmptyState />
               </Box>
             ) : (
@@ -173,10 +191,12 @@ export default function LogsPage() {
                   />
                 </Box>
                 {pagination && (
-                  <MuiPaginationComponent
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                  />
+                  <Box sx={{ borderTop: 1, borderColor: "divider" }}>
+                    <MuiPaginationComponent
+                      pagination={pagination}
+                      onPageChange={handlePageChange}
+                    />
+                  </Box>
                 )}
               </>
             )}
