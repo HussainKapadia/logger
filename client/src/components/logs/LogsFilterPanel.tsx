@@ -36,7 +36,6 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
   const handleAppChange = (app: string) => {
     const newApps = selectedApps.includes(app)
@@ -130,14 +129,17 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
   const appCheckboxes = useMemo(
     () =>
       appNames.map((app) => (
-        <label key={app} className="flex items-center space-x-2 text-black">
+        <label
+          key={app}
+          className="flex items-center space-x-2 text-black hover:bg-gray-50 p-1 rounded cursor-pointer"
+        >
           <input
             type="checkbox"
             checked={selectedApps.includes(app)}
             onChange={() => handleAppChange(app)}
-            className="form-checkbox"
+            className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span>{app}</span>
+          <span className="text-sm">{app}</span>
         </label>
       )),
     [appNames, selectedApps]
@@ -146,14 +148,17 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
   const levelCheckboxes = useMemo(
     () =>
       levels.map((level) => (
-        <label key={level} className="flex items-center space-x-2 text-black">
+        <label
+          key={level}
+          className="flex items-center space-x-2 text-black hover:bg-gray-50 p-1 rounded cursor-pointer"
+        >
           <input
             type="checkbox"
             checked={selectedLevels.includes(level)}
             onChange={() => handleLevelChange(level)}
-            className="form-checkbox"
+            className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <span>{level}</span>
+          <span className="text-sm">{level}</span>
         </label>
       )),
     [levels, selectedLevels]
@@ -167,49 +172,108 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
   }, [filteredUserIds, selectedUserIds]);
 
   return (
-    <aside
-      className={`bg-white rounded-lg shadow p-4 w-64 ${
-        collapsed ? "h-12 overflow-hidden" : ""
+    <div
+      className={`bg-white rounded-lg shadow-md border border-gray-200 ${
+        collapsed ? "h-auto" : ""
       }`}
-      style={{ minWidth: collapsed ? "3rem" : "16rem", transition: "all 0.2s" }}
+      style={{
+        minWidth: collapsed ? "auto" : "280px",
+        maxWidth: "100%",
+        transition: "all 0.2s ease-in-out",
+      }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-black">Filters</h2>
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
         <button
-          className="text-gray-500 hover:text-gray-700"
+          className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? "Expand filters" : "Collapse filters"}
         >
-          {collapsed ? "▶" : "▼"}
+          {collapsed ? (
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          ) : (
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          )}
         </button>
       </div>
+
+      {/* Content */}
       {!collapsed && (
-        <div className="space-y-6">
+        <div className="p-4 space-y-6 max-h-[calc(100vh-300px)] overflow-y-auto">
+          {/* App Name */}
           <div>
-            <h3 className="font-medium mb-2 text-black">App Name</h3>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {appCheckboxes}
+            <h3 className="font-medium mb-3 text-gray-800 flex items-center">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+              App Name
+            </h3>
+            <div className="space-y-1 max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-2">
+              {appNames.length === 0 ? (
+                <div className="text-gray-500 text-sm text-center py-2">
+                  No apps available
+                </div>
+              ) : (
+                appCheckboxes
+              )}
             </div>
           </div>
 
+          {/* Level */}
           <div>
-            <h3 className="font-medium mb-2 text-black">Level</h3>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {levelCheckboxes}
+            <h3 className="font-medium mb-3 text-gray-800 flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              Level
+            </h3>
+            <div className="space-y-1 max-h-32 overflow-y-auto bg-gray-50 rounded-lg p-2">
+              {levels.length === 0 ? (
+                <div className="text-gray-500 text-sm text-center py-2">
+                  No levels available
+                </div>
+              ) : (
+                levelCheckboxes
+              )}
             </div>
           </div>
 
+          {/* User ID */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-black">User ID</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium text-gray-800 flex items-center">
+                <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                User ID
+              </h3>
               <label className="flex items-center space-x-1 text-xs">
                 <input
                   type="checkbox"
                   checked={isAllFilteredUserIdsSelected}
                   onChange={handleSelectAllUserIds}
-                  className="form-checkbox h-3 w-3"
+                  className="form-checkbox h-3 w-3 text-blue-600 border-gray-300 rounded"
                 />
-                <span className="text-black">All</span>
+                <span className="text-gray-600 font-medium">All</span>
               </label>
             </div>
 
@@ -218,55 +282,68 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
               placeholder="Search User IDs..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 rounded px-2 py-1 text-sm text-black mb-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-black mb-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             />
 
-            <div className="space-y-1 max-h-40 overflow-y-auto border border-gray-200 rounded p-2">
+            <div className="space-y-1 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-gray-50">
               {filteredUserIds.length === 0 ? (
-                <div className="text-gray-500 text-sm text-center py-2">
-                  No User IDs found
+                <div className="text-gray-500 text-sm text-center py-4">
+                  {searchTerm
+                    ? "No matching User IDs found"
+                    : "No User IDs available"}
                 </div>
               ) : (
                 filteredUserIds.map((userId) => (
                   <label
                     key={userId}
-                    className="flex items-center space-x-2 text-black"
+                    className="flex items-center space-x-2 text-black hover:bg-white p-1 rounded cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={selectedUserIds.includes(userId)}
                       onChange={() => handleUserIdChange(userId)}
-                      className="form-checkbox h-4 w-4"
+                      className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <span className="text-sm">User {userId}</span>
                   </label>
                 ))
               )}
             </div>
+
             {selectedUserIds.length > 0 && (
-              <div className="mt-2 text-xs text-gray-600">
+              <div className="mt-2 text-xs text-gray-600 bg-blue-50 px-2 py-1 rounded">
                 {selectedUserIds.length} user
                 {selectedUserIds.length !== 1 ? "s" : ""} selected
               </div>
             )}
           </div>
 
+          {/* Timestamp Sort */}
           <div>
-            <h3 className="font-medium mb-2 text-black">Timestamp</h3>
+            <h3 className="font-medium mb-3 text-gray-800 flex items-center">
+              <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+              Timestamp Sort
+            </h3>
             <button
-              className="w-full border border-gray-300 rounded px-2 py-1 flex items-center justify-between text-black"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 flex items-center justify-between text-black hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               onClick={handleSortToggle}
             >
-              <span>Sort: {sort === "asc" ? "Oldest" : "Newest"}</span>
-              <span>{sort === "asc" ? "↑" : "↓"}</span>
+              <span className="font-medium">
+                Sort: {sort === "asc" ? "Oldest First" : "Newest First"}
+              </span>
+              <span className="text-lg">{sort === "asc" ? "↑" : "↓"}</span>
             </button>
           </div>
 
+          {/* Date Range */}
           <div>
-            <h3 className="font-medium mb-2 text-black">Date Range</h3>
-            <div className="flex flex-col gap-2">
-              <label className="flex flex-col text-black">
-                From:
+            <h3 className="font-medium mb-3 text-gray-800 flex items-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+              Date Range
+            </h3>
+            <div className="space-y-3">
+              <label className="flex flex-col text-gray-700">
+                <span className="text-sm font-medium mb-1">From:</span>
                 <input
                   type="date"
                   value={from || ""}
@@ -280,11 +357,11 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
                       to,
                     })
                   }
-                  className="form-input"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </label>
-              <label className="flex flex-col text-black">
-                To:
+              <label className="flex flex-col text-gray-700">
+                <span className="text-sm font-medium mb-1">To:</span>
                 <input
                   type="date"
                   value={to || ""}
@@ -298,21 +375,22 @@ const LogsFilterPanel: React.FC<LogsFilterPanelProps> = ({
                       to: e.target.value,
                     })
                   }
-                  className="form-input"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </label>
             </div>
           </div>
 
+          {/* Clear Button */}
           <button
-            className="w-full bg-gray-100 hover:bg-gray-200 text-black rounded px-2 py-1 mt-2"
+            className="w-full bg-gray-500 hover:bg-gray-600 text-white rounded-lg px-4 py-2 font-medium transition-colors focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             onClick={onClear}
           >
             Clear all filters
           </button>
         </div>
       )}
-    </aside>
+    </div>
   );
 };
 
