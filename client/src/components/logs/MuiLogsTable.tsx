@@ -33,7 +33,7 @@ const StyledHeaderCell = styled(TableCell)(({ theme }) => ({
   fontSize: "0.75rem",
   textTransform: "uppercase",
   letterSpacing: "0.05em",
-  color: "#6b7280",
+  color: "#ffffff",
   padding: theme.spacing(1.5, 3),
 }));
 
