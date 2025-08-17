@@ -182,7 +182,7 @@ export default function LogsPage() {
               </Box>
             ) : (
               <>
-                <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
+                <Box sx={{ flex: 1, p: 2 }}>
                   <MuiLogsTable
                     logs={logs}
                     limit={limit}

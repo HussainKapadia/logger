@@ -18,12 +18,6 @@ import { Log, LOG_LEVEL_STYLES } from "@/types/logs";
 import LimitSelector from "./LimitSelector";
 
 // Styled components
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-  borderRadius: theme.spacing(1),
-  overflow: "hidden",
-}));
-
 const StyledTableHead = styled(TableHead)(({ theme }) => ({
   backgroundColor: "#FF9187",
 }));
@@ -35,6 +29,7 @@ const StyledHeaderCell = styled(TableCell)(({ theme }) => ({
   letterSpacing: "0.05em",
   color: "#ffffff",
   padding: theme.spacing(1.5, 3),
+  backgroundColor: "#FF9187", // reapply bg so sticky works
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -135,17 +130,16 @@ const MuiLogsTable: React.FC<MuiLogsTableProps> = ({
         <LimitSelector limit={limit} onLimitChange={onLimitChange} />
       </Box>
 
-      {/* Table */}
+      {/* Table with sticky header */}
       <Paper
         sx={{
           boxShadow:
             "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
           borderRadius: 1,
-          overflow: "hidden",
         }}
       >
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ maxHeight: 750 }}>
+          <Table stickyHeader>
             <StyledTableHead>
               <TableRow>
                 {TABLE_HEADERS.map((header) => (
